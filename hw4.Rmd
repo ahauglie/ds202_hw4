@@ -92,5 +92,7 @@ This is the growth trajectory for the lightest and heaviest chicks (at birth).
 7. What else do you find interesting in the dataset? Show your exploratory analysis.
 
 ```{r}
-ggplot(OverallGain, aes(x=reorder(Chick, weightgain), y=weightgain))+geom_point()+facet_wrap(~Diet)
+ggplot(OverallGain, aes(x=reorder(Chick, weightgain), y=weightgain))+geom_point(aes(color=Diet))+facet_wrap(~Diet, scales="free_x")+ylab("Weight Gain (grams)")+xlab("Chick")+ggtitle("Weight gain of Chicks by Diet")
 ```
+
+This is just individually looking at how much each chick gained based on the diet they were in, just a clearer look at which chicks were in what diet and then it shows how each chick gained on the diet. As you can see, the chicks that were in Diet 4 actually had the least spread of weight gain, they all gained a pretty substainial amount and there weren't any outliers that the diet "didn't work on" or didn't gain much weight like in the other diets. This shows that there are other factors that aren't diet that affetc weight gain, but diet is a huge part in determining how big a chick will get. 
