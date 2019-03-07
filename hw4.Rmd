@@ -1,0 +1,96 @@
+---
+title: "hw4"
+author: "Alicia Hauglie"
+date: "3/6/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(classdata)
+library(dplyr)
+library(ggplot2)
+```
+
+1. Get a frequency breakdown of the number of chicks, their average weight and the standard deviation of the weights in each of the diets at the start of the study. Store the resulting data frame in a variable named weight0 and print.
+
+```{r}
+weight0 <- ChickWeight %>% group_by(Diet) %>% summarize(n = n(), meanweight = mean(weight, na.rm = TRUE), standard_deviation_weight = sd(weight, na.rm = TRUE)) 
+  #How do we incorporate Time 0 into this? Do we need to or is what we have already at time 0?
+weight0
+```
+
+2. Each chick should have twelve weight measurements. Use the dplyr package to identify how many measurements are there for each chick. Extract a subset of the data for all chicks with complete information, name the data set complete, and print the first 3 rows. (Hint: you might want to use mutate to introduce a helper variable consisting of the number of observations)
+
+```{r}
+complete <- ChickWeight %>% group_by(Chick) %>% mutate(n=n()) %>% filter(n()==12)
+head(complete, 3)
+```
+
+3. In the complete data set introduce a new variable that measures the current weight difference compared to day 0. Name this variable  weightgain and print the first 3 rows of the new data frame.
+
+```{r}
+weightgain <- complete %>% group_by(Chick) %>%mutate(weightgain = weight[Time == Time] - weight[Time == 0])
+head(weightgain, 3)
+```
+
+4. Use {ggplot2} to create side-by-side boxplots of weightgain by Diet for day 21. Describe the relationship in 2-3 sentences. Change the order of the categories in the Diet variable such that the boxplots are ordered by median weightgain, and the lower limit of the y axis should be 0.
+
+```{r}
+ggplot(weightgain, aes(x=reorder(Diet, weightgain, median), y=(weightgain), color = Diet))+geom_boxplot()+expand_limits(y=0)+ylab("Weight Gain (Grams)")+xlab("Diets")+ggtitle("Weight Gain by Diets")
+?ggtitle
+```
+The boxplots show the weight gain for the chicks in each of the 4 diets. As you can see, Diet 1 had the least average weight gain and therefore was probably the least nutritious diet. We can see how the different diets affected the chicks based on how much average weight was gained, if we want bigger chicks, we would choose the 4th diet probably as it had the highest average weight gain. 
+
+
+5. Answer the following question using numerical and graphical summary: Which chick gained the most weight and which gained the least weight? What diets were they on?
+
+```{r}
+OverallGain <- weightgain[(weightgain$Time==21),]
+a<- arrange(OverallGain, desc(weightgain))
+head(a,1)
+```
+The chick that gained the most weight was Chick 35, and it was on Diet 3. 
+
+
+```{r}
+b <- arrange(OverallGain, desc(-weightgain))
+head(b,1)
+```
+The chick that gained the least amount was Chick 24, which was on Diet 2.
+
+
+```{r}
+ggplot(OverallGain, aes(x=reorder(Chick, weightgain), y=weightgain))+geom_point()+ylab("Weight Gain (grams)")+xlab("Chick")+ggtitle("Weight Gain by Chick")
+
+```
+Here you can see the weight gain for each chick, ordered from least weight gain to most. 
+
+
+6. For the chicks with the least and the most weight at time 0, plot their growth trajectories over time. 
+```{r}
+WeightAtTime0 <- weightgain[(weightgain$Time==0),]
+c <- arrange(WeightAtTime0, desc(-weight))
+head(c,1)
+```
+This shows that the lightest chick at birth was Chick 27. 
+
+```{r}
+d <- arrange(WeightAtTime0, desc(weight))
+head(d,1)
+```
+This shows the heaviest chick at birth was Chick 3. 
+
+```{r}
+MostAndLeast <- weightgain[(weightgain$Chick==3 | weightgain$Chick==27),]
+
+ggplot(MostAndLeast, aes(x=Time, y=weightgain, color = Chick))+geom_point()+ylab("Weight Gain (grams)")+xlab("Time (days)")+ggtitle("Weight Gain by Time", subtitle = "for Lightest and Heaviest Chicks at Birth") +scale_color_manual((breaks = c("3", "23")), values=c("pink", "maroon"))
+```
+This is the growth trajectory for the lightest and heaviest chicks (at birth). 
+
+
+7. What else do you find interesting in the dataset? Show your exploratory analysis.
+
+```{r}
+ggplot(OverallGain, aes(x=reorder(Chick, weightgain), y=weightgain))+geom_point()+facet_wrap(~Diet)
+```
